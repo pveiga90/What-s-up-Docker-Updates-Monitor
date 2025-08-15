@@ -10,12 +10,11 @@ DOMAIN = "wud_getupdates"
 
 async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, async_add_entities):
     """Set up the WUD sensor platform."""
-    wud_host = config_entry.data["host"]
-    wud_port = config_entry.data["port"]
+    wud_container_api_url = config_entry.data["container_api_url"]
     instance_name = config_entry.data["instance_name"]  # Get instance name
 
     # Fetch container information from WUD API
-    containers = await get_containers(wud_host, wud_port)
+    containers = await get_containers(wud_container_api_url)
 
     # Create a sensor for each container and assign it to the instance name device
     sensors = []
@@ -24,11 +23,10 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     
     async_add_entities(sensors, True)
 
-async def get_containers(host, port):
+async def get_containers(container_api_url):
     """Fetch containers from the WUD API."""
-    url = f"http://{host}:{port}/api/containers"
     async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
+        async with session.get(container_api_url) as response:
             if response.status == 200:
                 return await response.json()
             else:

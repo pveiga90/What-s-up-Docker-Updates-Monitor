@@ -15,8 +15,7 @@ class WUDMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             return self.async_show_form(
                 step_id="user",
                 data_schema=vol.Schema({
-                    vol.Required("host"): str,
-                    vol.Required("port"): int,
+                    vol.Required("container_api_url"): str,
                     vol.Required("instance_name"): str  # Request instance name
                 })
             )
@@ -25,8 +24,7 @@ class WUDMonitorConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         return self.async_create_entry(
             title=user_input["instance_name"],
             data={
-                "host": user_input["host"],
-                "port": user_input["port"],
+                "host": user_input["container_api_url"],
                 "instance_name": user_input["instance_name"]
             }
         )
@@ -48,8 +46,7 @@ class WUDMonitorOptionsFlowHandler(config_entries.OptionsFlow):
             return self.async_show_form(
                 step_id="init",
                 data_schema=vol.Schema({
-                    vol.Optional("host", default=self.config_entry.data.get("host")): str,
-                    vol.Optional("port", default=self.config_entry.data.get("port")): int,
+                    vol.Optional("container_api_url", default=self.config_entry.data.get("container_api_url")): str,
                     vol.Optional("instance_name", default=self.config_entry.data.get("instance_name")): str,
                 })
             )
