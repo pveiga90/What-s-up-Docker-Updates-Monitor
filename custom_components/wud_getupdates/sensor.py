@@ -82,6 +82,7 @@ class WUDContainerSensor(Entity):
             "container_id": self._container["id"],
             "version": self._container.get("version", "unknown"),
             "update_available": self._state,
+            "server": self._container.get("labels", {}).get("wud.meta.server", "unknown"),
         }
 
     async def async_update(self):
