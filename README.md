@@ -29,14 +29,14 @@ Search for "What's up Docker Updates Monitor" in the HACS store. If you don't se
 
 After installation, setup the integration via the web UI like any other integration. When prompted, provide the following:
 
--   **Host:** *Your What's up Docker IP Address or hostname*
--   **Port:** *the port for the Web UI of What's up Docker*
+-   **Host:** *Your What's up Docker IP Address or hostname. You may also include `http://` or `https://`; if no protocol is specified the integration will assume `http`.*
+-   **Port:** *the port for the Web UI of What's up Docker (optional). Defaults to port 80 for http, 443 for https.*
 -   **Instance_Name:** *This will be the "device" all sensors get associated to*
 
 
 ### Troubleshooting
 
-If you are having issues connecting, make sure you can successfully connect to `http://<wud_host>:3000/api/containers`. This should retrive a JSON with all your monitored containers info.
+If you are having issues connecting, make sure you can successfully connect to `<protocol>://<wud_host>[:<port>]/api/containers` (e.g. `http://10.0.0.5:3000/api/containers`). This should retrieve a JSON with all your monitored containers info.
 
 ## Contributions
 

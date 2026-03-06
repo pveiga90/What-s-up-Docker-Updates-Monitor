@@ -1,6 +1,6 @@
 import logging
 import aiohttp
-from homeassistant.helpers.entity import Entity
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 
@@ -25,17 +25,47 @@ async def async_setup_entry(hass: HomeAssistant, config_entry: ConfigEntry, asyn
     async_add_entities(sensors, True)
 
 async def get_containers(host, port):
-    """Fetch containers from the WUD API."""
-    url = f"http://{host}:{port}/api/containers"
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url) as response:
-            if response.status == 200:
-                return await response.json()
-            else:
-                _LOGGER.error("Failed to fetch containers from WUD")
-                return []
+    """Fetch containers from the WUD API.
 
-class WUDContainerSensor(Entity):
+    The host argument may include a scheme (http:// or https://). If no scheme
+    is provided we default to http. The port value is optional; if it's empty or
+    evaluates to False we omit the ":port" portion of the URL entirely.
+    """
+    # remove any trailing slashes so concatenation below is clean
+    host = host.rstrip("/")
+
+    # ensure we have a scheme
+    if not host.lower().startswith(("http://", "https://")):
+        host = "http://" + host
+
+    # construct base URL and append port only when it's set
+    if port:
+        url = f"{host}:{port}/api/containers"
+    else:
+        url = f"{host}/api/containers"
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    return await response.json()
+                else:
+                    _LOGGER.error(
+                        "Failed to fetch containers from WUD at %s - HTTP %s: %s",
+                        url,
+                        response.status,
+                        await response.text(),
+                    )
+                    return []
+    except Exception as err:
+        _LOGGER.error(
+            "Unexpected error when fetching containers from WUD at %s: %s",
+            url,
+            err,
+        )
+        return []
+
+class WUDContainerSensor(SensorEntity):
     """Representation of a What's Up Docker container sensor."""
 
     def __init__(self, container, config_entry: ConfigEntry, instance_name: str):
@@ -83,8 +113,3 @@ class WUDContainerSensor(Entity):
             "version": self._container.get("version", "unknown"),
             "update_available": self._state,
         }
-
-    async def async_update(self):
-        """Fetch updated data from the API."""
-        # Optionally re-fetch container data if needed
-        pass
